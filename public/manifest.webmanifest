@@ -1,0 +1,16 @@
+{
+  "name": "El regalo invisible de Pablo",
+  "short_name": "Regalo Pablo",
+  "description": "El amigo invisible de la familia: entra con tu nombre y tu PIN, deja tu lista de deseos y abre tu sobre.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6efe3",
+  "theme_color": "#f6efe3",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512-mask.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

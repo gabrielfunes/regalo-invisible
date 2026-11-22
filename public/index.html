@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6efe3">
+<title>El regalo invisible de Pablo</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f6efe3; --card:#fffdf7; --green:#1b4332; --green2:#2d6a4f;
+  --red:#9d0208; --red2:#b3001b; --gold:#c9a227; --ink:#22352b;
+  --muted:#6c7a6f; --cream:#f3ead6; --line:rgba(27,67,50,.16);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html { height:100%; }
+body {
+  font-family:'Inter',sans-serif; background:var(--paper); color:var(--ink);
+  min-height:100%; overscroll-behavior-y:none;
+}
+button { font:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+input, textarea, select { font:inherit; color:inherit; }
+a { color:var(--red); }
+
+/* nieve */
+.snow { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:1; }
+.snow i { position:absolute; top:-12px; border-radius:50%; background:rgba(255,255,255,.95); box-shadow:0 0 6px rgba(255,255,255,.8); animation:fall linear infinite; }
+@keyframes fall { to { transform:translateY(105vh) translateX(24px); } }
+
+.view { position:relative; z-index:2; max-width:480px; margin:0 auto; padding:26px 20px 40px; min-height:100dvh; display:none; flex-direction:column; animation:enter .45s cubic-bezier(.2,.9,.3,1); }
+.view.on { display:flex; }
+@keyframes enter { from { opacity:0; transform:translateY(14px); } }
+
+.brand { text-align:center; padding-top:14px; }
+.brand .k { font-family:'Caveat',cursive; color:var(--red); font-size:25px; }
+.brand h1, .brand h2 { font-family:'Fraunces',serif; font-weight:600; color:var(--green); line-height:1.06; }
+.brand h1 { font-size:37px; margin-top:2px; }
+.brand h2 { font-size:31px; margin-top:2px; }
+.brand .sub { margin-top:8px; font-size:13px; color:var(--muted); letter-spacing:.3px; }
+
+.card { background:var(--card); border:1.5px solid var(--line); border-radius:20px; box-shadow:0 6px 18px rgba(27,67,50,.08); }
+.event { margin-top:22px; padding:15px 17px; display:flex; align-items:center; gap:14px; }
+.cal { flex:none; width:48px; height:48px; border-radius:12px; background:var(--green); color:var(--paper); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.cal b { font-family:'Fraunces',serif; font-size:20px; line-height:1; }
+.cal span { font-size:9px; letter-spacing:1.5px; }
+.event .t b { display:block; font-size:15px; color:var(--green); }
+.event .t span { font-size:12.5px; color:var(--muted); }
+
+.cta { display:block; width:100%; margin-top:auto; background:var(--red); color:#fff8ec; text-align:center; padding:16px; border-radius:16px; font-size:16px; font-weight:600; letter-spacing:.3px; box-shadow:0 10px 22px rgba(157,2,8,.3); transition:transform .15s, box-shadow .15s; }
+.cta:active { transform:scale(.97); }
+.cta.green { background:var(--green); box-shadow:0 10px 22px rgba(27,67,50,.3); }
+.cta[disabled] { opacity:.5; pointer-events:none; }
+.fine { margin-top:12px; text-align:center; font-size:11.5px; color:var(--muted); }
+.error { margin-top:12px; text-align:center; font-size:13.5px; color:var(--red); min-height:18px; font-weight:500; }
+
+/* login */
+.who { margin-top:24px; font-family:'Fraunces',serif; font-size:21px; color:var(--green); }
+.chips { margin-top:12px; display:flex; flex-wrap:wrap; gap:10px; }
+.chip { padding:11px 17px; border-radius:999px; background:var(--card); border:1.5px solid rgba(27,67,50,.25); font-size:14.5px; box-shadow:0 2px 6px rgba(27,67,50,.06); transition:transform .15s, background .15s; }
+.chip:active { transform:scale(.95); }
+.chip.sel { background:var(--green); color:var(--paper); border-color:var(--green); }
+.chip small { opacity:.75; font-size:11px; }
+.pinbox { margin-top:18px; display:none; animation:enter .35s; }
+.pinbox.on { display:block; }
+.pinbox label { font-size:13px; color:var(--muted); display:block; margin-bottom:8px; text-align:center; }
+.pinrow { display:flex; justify-content:center; gap:10px; }
+.pinrow input {
+  width:180px; text-align:center; font-size:26px; letter-spacing:10px; padding:12px 10px 12px 20px;
+  border-radius:16px; border:1.5px solid var(--line); background:var(--card); color:var(--green);
+  font-family:'Fraunces',serif; font-weight:600; outline:none;
+}
+.pinrow input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(27,67,50,.12); }
+.adminlink { margin-top:22px; text-align:center; font-size:12.5px; color:var(--muted); }
+.adminlink button { color:var(--muted); text-decoration:underline; text-underline-offset:3px; font-size:12.5px; }
+.adminbox { margin-top:16px; display:none; animation:enter .35s; }
+.adminbox.on { display:block; }
+.adminbox input { width:100%; padding:14px 16px; border-radius:16px; border:1.5px solid var(--line); background:var(--card); outline:none; font-size:15px; }
+.adminbox input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(27,67,50,.12); }
+
+/* cabecera app + cuenta atrás */
+.count { display:flex; gap:10px; margin-top:20px; }
+.count .c { flex:1; padding:13px 6px; text-align:center; }
+.count .c b { font-family:'Fraunces',serif; font-size:23px; color:var(--green); display:block; }
+.count .c span { font-size:10.5px; color:var(--muted); letter-spacing:.4px; }
+.tabbar { margin-top:16px; display:flex; border-radius:16px; background:#efe5cf; padding:5px; position:sticky; top:10px; z-index:5; box-shadow:0 4px 14px rgba(27,67,50,.08); }
+.tabbar button { flex:1; text-align:center; padding:10px 0; font-size:13px; color:var(--muted); border-radius:12px; transition:background .2s,color .2s; }
+.tabbar button.on { background:var(--green); color:var(--paper); font-weight:600; }
+.panel { display:none; flex-direction:column; flex:1; animation:enter .35s; }
+.panel.on { display:flex; }
+
+/* mi lista */
+.hintcard { margin-top:16px; padding:14px 16px; border-radius:16px; background:var(--cream); border:1.5px dashed rgba(157,2,8,.4); animation:enter .4s; }
+.hintcard b { font-size:12.5px; color:var(--red); letter-spacing:.3px; }
+.hintcard p { font-family:'Caveat',cursive; font-size:20px; color:#5b5646; margin-top:3px; }
+.wishcard { margin-top:16px; padding:18px; flex:none; }
+.wishcard h3 { font-family:'Fraunces',serif; font-size:20px; color:var(--green); }
+.wishcard .wn { font-size:12px; color:var(--muted); margin-top:2px; }
+.wishlist { list-style:none; margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+.wishlist li { display:flex; gap:10px; align-items:flex-start; font-size:14px; line-height:1.4; animation:enter .3s; }
+.wishlist li::before { content:"✶"; color:var(--gold); font-size:13px; margin-top:2px; }
+.wishlist li .txt { flex:1; }
+.wishlist li a { font-size:12.5px; text-decoration:none; border-bottom:1px dotted var(--red); margin-left:6px; white-space:nowrap; }
+.wishlist li .del { color:var(--muted); font-size:16px; padding:0 2px; }
+.wform { margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.wform input { padding:12px 14px; border-radius:14px; border:1.5px solid var(--line); background:#fff; outline:none; font-size:14px; }
+.wform input:focus { border-color:var(--green); }
+.wform .add { padding:12px; border-radius:14px; background:var(--green); color:var(--paper); font-weight:600; font-size:14px; transition:transform .15s; }
+.wform .add:active { transform:scale(.97); }
+.saved { text-align:center; font-size:12px; color:var(--green2); margin-top:8px; min-height:15px; }
+
+/* mi amigo / sobre */
+.stage { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 0 20px; min-height:380px; position:relative; }
+.envelope { position:relative; width:290px; height:190px; margin-top:96px; touch-action:none; user-select:none; -webkit-user-select:none; }
+.env-back { position:absolute; inset:0; border-radius:14px; background:var(--red2); box-shadow:0 18px 36px rgba(157,2,8,.35); }
+.env-letter { position:absolute; left:16px; right:16px; top:12px; height:166px; border-radius:12px; background:var(--card); border:1.5px solid var(--line); box-shadow:0 10px 24px rgba(0,0,0,.18); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; transition:transform .8s cubic-bezier(.2,.9,.3,1.1), opacity .4s; }
+.env-letter .l1 { font-family:'Caveat',cursive; font-size:22px; color:var(--muted); }
+.env-letter .l2 { font-family:'Fraunces',serif; font-size:36px; font-weight:600; color:var(--red); }
+.env-sides { position:absolute; inset:0; border-radius:14px; background:#a5011a; clip-path:polygon(0 0, 50% 52%, 0 100%); }
+.env-sides2 { position:absolute; inset:0; border-radius:14px; background:#a5011a; clip-path:polygon(100% 0, 50% 52%, 100% 100%); }
+.env-bottom { position:absolute; inset:0; border-radius:14px; background:var(--red2); clip-path:polygon(0 100%, 50% 46%, 100% 100%); }
+.env-flap { position:absolute; left:0; right:0; top:0; height:96px; background:#8f0118; clip-path:polygon(0 0, 100% 0, 50% 100%); border-radius:14px 14px 0 0; transform-origin:top center; transition:transform .7s ease; z-index:3; }
+.env-seal { position:absolute; left:50%; top:60px; margin-left:-22px; width:44px; height:44px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #e9c766, var(--gold) 60%, #a07f17); display:flex; align-items:center; justify-content:center; font-size:19px; color:#5b4507; z-index:4; box-shadow:0 3px 8px rgba(0,0,0,.25); font-family:'Fraunces',serif; transition:opacity .3s; }
+.envelope.open .env-flap { transform:rotateX(160deg); z-index:1; }
+.envelope.open .env-seal { opacity:0; }
+.envelope.open .env-letter { transform:translateY(-108px); z-index:5; }
+.holdhint { margin-top:126px; text-align:center; transition:opacity .3s; }
+.holdhint .ring { width:64px; height:64px; margin:0 auto; position:relative; }
+.holdhint .ring svg { transform:rotate(-90deg); }
+.holdhint .ring .emoji { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.holdhint p { margin-top:10px; font-family:'Caveat',cursive; font-size:22px; color:var(--green); }
+.teaser { text-align:center; padding:20px; }
+.teaser .envmini { font-size:52px; }
+.teaser h3 { font-family:'Fraunces',serif; color:var(--green); font-size:22px; margin-top:12px; }
+.teaser p { color:var(--muted); font-size:14px; margin-top:8px; line-height:1.5; }
+.result { padding:22px 18px; text-align:center; position:relative; overflow:hidden; margin-top:16px; animation:enter .5s; }
+.result .r1 { font-family:'Caveat',cursive; font-size:23px; color:var(--muted); }
+.result .r2 { font-family:'Fraunces',serif; font-size:38px; font-weight:600; color:var(--red); line-height:1.1; animation:pop .6s cubic-bezier(.2,1.4,.4,1); }
+@keyframes pop { from { transform:scale(.4); opacity:0; } }
+.confetti { position:absolute; inset:0; pointer-events:none; }
+.confetti i { position:absolute; width:7px; height:11px; border-radius:2px; animation:conf 1.6s ease-out forwards; }
+@keyframes conf { 0% { transform:translateY(-10px) rotate(0); opacity:1; } 100% { transform:translateY(140px) rotate(340deg); opacity:0; } }
+
+/* info */
+.infocard { margin-top:16px; padding:18px; }
+.infocard h3 { font-family:'Fraunces',serif; font-size:18px; color:var(--green); margin-bottom:10px; }
+.infocard p, .infocard li { font-size:13.5px; color:var(--ink); line-height:1.55; }
+.infocard ul { padding-left:18px; }
+.infocard .row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-top:1px dashed var(--line); }
+.infocard .row:first-of-type { border-top:none; }
+.switch { flex:none; width:48px; height:28px; border-radius:999px; background:#d8cdb4; position:relative; transition:background .2s; }
+.switch::after { content:""; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.2); transition:left .2s; }
+.switch.on { background:var(--green2); }
+.switch.on::after { left:23px; }
+.linkish { color:var(--red); text-decoration:underline; text-underline-offset:3px; font-size:13.5px; }
+.center { text-align:center; }
+
+/* admin */
+.admintitle { margin-top:18px; font-family:'Fraunces',serif; font-size:20px; color:var(--green); }
+.admintitle small { font-family:'Inter',sans-serif; font-size:12px; color:var(--muted); margin-left:6px; font-weight:400; }
+.acard { margin-top:12px; padding:16px; }
+.acard label { display:block; font-size:12px; color:var(--muted); margin:10px 0 4px; }
+.acard label:first-child { margin-top:0; }
+.acard input[type=text], .acard input[type=date], .acard input[type=number] { width:100%; padding:11px 13px; border-radius:12px; border:1.5px solid var(--line); background:#fff; outline:none; font-size:14px; }
+.acard input:focus { border-color:var(--green); }
+.mini { padding:9px 12px; border-radius:12px; background:var(--green); color:var(--paper); font-weight:600; font-size:13px; transition:transform .15s; }
+.mini:active { transform:scale(.96); }
+.mini.red { background:var(--red); }
+.mini.ghost { background:transparent; color:var(--green); border:1.5px solid var(--line); }
+.plist { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.prow { background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:10px 13px; font-size:14px; animation:enter .3s; }
+.prow .l1 { display:flex; align-items:center; gap:8px; }
+.prow .pn { font-weight:600; color:var(--green); }
+.prow .pn small { color:var(--muted); font-weight:400; }
+.prow .st { margin-left:auto; font-size:11px; color:#9aa69d; }
+.prow .st.ok { color:var(--green2); font-weight:600; }
+.prow .l2 { display:flex; align-items:center; gap:8px; margin-top:8px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+.prow .pin { font-family:'Fraunces',serif; font-size:16px; letter-spacing:2px; color:var(--red); font-weight:600; }
+.prow .act { color:var(--red); text-decoration:underline; text-underline-offset:2px; font-size:12px; }
+.pairlist { margin-top:10px; display:flex; flex-direction:column; gap:6px; }
+.pair { display:flex; align-items:center; gap:8px; font-size:13.5px; background:var(--cream); border-radius:10px; padding:8px 12px; }
+.pair .x { margin-left:auto; color:var(--muted); }
+.drawzone { margin-top:16px; text-align:center; }
+.drawzone .dado { font-size:44px; }
+.drawzone p { font-size:13px; color:var(--muted); margin:8px 0 14px; line-height:1.5; }
+.spin { animation:spin 1s linear infinite; display:inline-block; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.foot { margin-top:26px; text-align:center; font-size:11px; color:#a9b3a5; }
+</style>
+</head>
+<body>
+<div class="snow" id="snow"></div>
+
+<!-- ============ ENTRADA ============ -->
+<section class="view" id="v-login">
+  <div class="brand">
+    <div class="k">el sorteo de la familia</div>
+    <h1 id="login-title">El regalo<br>invisible de Pablo</h1>
+    <div class="sub" id="login-sub">Nochevieja</div>
+  </div>
+  <div class="card event">
+    <div class="cal"><b id="ev-day">31</b><span id="ev-month">DIC</span></div>
+    <div class="t"><b>Día del regalo</b><span id="ev-note">Apúntate antes de que cierre el plazo</span></div>
+  </div>
+  <div id="login-main">
+    <div class="who">¿Quién eres?</div>
+    <div class="chips" id="chips"></div>
+    <div class="pinbox" id="pinbox">
+      <label id="pinlabel">Tu PIN (te lo dio Gabri)</label>
+      <div class="pinrow"><input id="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="····"></div>
+    </div>
+    <div class="error" id="login-error"></div>
+    <button class="cta" id="btn-login" disabled>Soy yo, entrar ✶</button>
+    <div class="fine">Cada uno entra con su nombre y su PIN · sin registro</div>
+    <div class="adminlink"><button id="btn-adminlink">Soy Gabri</button></div>
+  </div>
+  <div class="adminbox" id="adminbox">
+    <input type="password" id="adminpass" placeholder="Contraseña de organizador" autocomplete="current-password">
+    <div class="error" id="admin-error"></div>
+    <button class="cta green" id="btn-admin">Entrar al panel</button>
+  </div>
+</section>
+
+<!-- ============ PARTICIPANTE ============ -->
+<section class="view" id="v-app">
+  <div class="brand">
+    <div class="k" id="app-k">hola</div>
+    <h2 id="app-title">El regalo invisible de Pablo</h2>
+    <div class="sub" id="app-sub"></div>
+  </div>
+  <div class="count">
+    <div class="card c"><b id="cd-join">–</b><span id="cd-join-l">días p. apuntarte</span></div>
+    <div class="card c"><b id="cd-gift">–</b><span>días p. regalo</span></div>
+    <div class="card c"><b id="cd-budget">–</b><span>presupuesto</span></div>
+  </div>
+  <div class="tabbar">
+    <button data-tab="lista" id="tab-lista">Mi lista</button>
+    <button data-tab="amigo" id="tab-amigo">Mi amigo</button>
+    <button data-tab="info" id="tab-info">Info</button>
+  </div>
+
+  <div class="panel" id="p-lista">
+    <div class="hintcard" id="my-hint" style="display:none">
+      <b>🕵️ PISTA DE TU AMIGO INVISIBLE</b>
+      <p id="my-hint-text"></p>
+    </div>
+    <div class="card wishcard">
+      <h3>Tu lista de deseos</h3>
+      <div class="wn">Solo la ve la persona a la que le toques tú</div>
+      <ul class="wishlist" id="my-wishes"></ul>
+      <div class="wform">
+        <input type="text" id="w-text" maxlength="200" placeholder="¿Qué te gustaría?">
+        <input type="url" id="w-link" placeholder="Enlace (opcional, https://…)">
+        <button class="add" id="w-add">Añadir a mi lista</button>
+      </div>
+      <div class="saved" id="w-saved"></div>
+    </div>
+    <button class="cta" id="w-save" style="margin-top:16px">Guardar lista</button>
+  </div>
+
+  <div class="panel" id="p-amigo">
+    <div class="stage" id="stage">
+      <!-- teaser / sobre / resultado según estado -->
+    </div>
+    <div id="amigo-after"></div>
+  </div>
+
+  <div class="panel" id="p-info">
+    <div class="card infocard">
+      <h3>Cómo funciona</h3>
+      <ul>
+        <li>Apúntate y rellena tu lista de deseos antes del cierre.</li>
+        <li>El sorteo se hace solo al cerrar el plazo y no repite las parejas del año pasado.</li>
+        <li>Cuando esté hecho, abre tu sobre en «Mi amigo»: solo tú ves a quién le regalas.</li>
+        <li>Puedes dejar una pista anónima sobre tu regalo.</li>
+      </ul>
+    </div>
+    <div class="card infocard">
+      <h3>Avisos</h3>
+      <div class="row">
+        <span>Recordatorios en este dispositivo</span>
+        <button class="switch" id="push-toggle" aria-label="Avisos"></button>
+      </div>
+      <p id="push-note" style="margin-top:6px;font-size:12px;color:var(--muted)">Te avisamos cuando cierre el plazo, cuando esté el sorteo y el día del regalo. En iPhone hace falta añadir la app a la pantalla de inicio.</p>
+    </div>
+    <div class="card infocard center">
+      <button class="linkish" id="btn-switch">Cambiar de cuenta</button>
+      <p style="margin-top:8px;font-size:12px;color:var(--muted)">¿Un peque sin móvil? Entra con su nombre y su PIN desde aquí.</p>
+    </div>
+    <div class="foot" id="app-foot"></div>
+  </div>
+</section>
+
+<!-- ============ PANEL DE GABRI ============ -->
+<section class="view" id="v-admin">
+  <div class="brand">
+    <div class="k">panel de</div>
+    <h2>Gabri</h2>
+    <div class="sub" id="admin-sub"></div>
+  </div>
+
+  <div class="admintitle">El sorteo</div>
+  <div class="card acard">
+    <label>Nombre de la app</label>
+    <input type="text" id="cfg-name" maxlength="80">
+    <label>Presupuesto</label>
+    <input type="text" id="cfg-budget" maxlength="60">
+    <label>Cierre para apuntarse</label>
+    <input type="date" id="cfg-join">
+    <label>Día del regalo</label>
+    <input type="date" id="cfg-gift">
+    <div style="margin-top:12px;text-align:right"><button class="mini" id="cfg-save">Guardar</button></div>
+  </div>
+
+  <div class="admintitle">Participantes <small>cada uno tiene su PIN</small></div>
+  <div class="plist" id="admin-users"></div>
+  <div class="card acard">
+    <label>Nombre</label>
+    <input type="text" id="u-name" maxlength="60" placeholder="María">
+    <label>PIN (4 a 8 dígitos)</label>
+    <div style="display:flex;gap:8px">
+      <input type="text" id="u-pin" inputmode="numeric" maxlength="8" style="flex:1" placeholder="1234">
+      <button class="mini ghost" id="u-gen">Generar</button>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input type="checkbox" id="u-kid"> Es un peque</label>
+    <div style="margin-top:12px;text-align:right"><button class="mini" id="u-add">Añadir</button></div>
+    <div class="error" id="u-error" style="text-align:right"></div>
+  </div>
+
+  <div class="admintitle">Año pasado <small>para no repetir</small></div>
+  <div class="card acard">
+    <div style="display:flex;gap:8px;align-items:center">
+      <input type="text" id="ly-from" placeholder="Quién regaló" style="flex:1">
+      <span>→</span>
+      <input type="text" id="ly-to" placeholder="A quién" style="flex:1">
+    </div>
+    <div style="margin-top:10px;text-align:right"><button class="mini ghost" id="ly-add">Añadir pareja</button></div>
+    <div class="pairlist" id="ly-list"></div>
+    <div style="margin-top:12px;text-align:right" id="ly-save-wrap" style="display:none"><button class="mini" id="ly-save">Guardar parejas</button></div>
+  </div>
+
+  <div class="admintitle">Sorteo</div>
+  <div class="card acard drawzone" id="drawzone"></div>
+
+  <div class="card acard center" style="margin-top:16px">
+    <button class="linkish" id="btn-export">Descargar copia (sin asignaciones)</button><br><br>
+    <button class="linkish" id="btn-logout">Cerrar sesión del panel</button>
+  </div>
+  <div class="foot" id="admin-foot"></div>
+</section>
+
+<script>
+const $ = s => document.querySelector(s);
+const state = { names: [], cfg: null, me: null, admin: null, role: null, selected: null, wishes: [], revealed: null, hint: '' };
+const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const api = async (path, body) => {
+  const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) { const e = new Error(data.error || 'Error de conexión'); e.status = r.status; throw e; }
+  return data;
+};
+const show = id => { document.querySelectorAll('.view').forEach(v => v.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0, 0); };
+const daysTo = d => { const today = new Date(); today.setHours(0,0,0,0); return Math.max(0, Math.round((new Date(d + 'T00:00:00') - today) / 86400000)); };
+
+// nieve
+(() => {
+  const snow = $('#snow');
+  for (let i = 0; i < 26; i++) {
+    const f = document.createElement('i');
+    const s = 2 + Math.random() * 4;
+    f.style.cssText = `left:${Math.random()*100}%;width:${s}px;height:${s}px;opacity:${.4+Math.random()*.6};animation-duration:${7+Math.random()*9}s;animation-delay:-${Math.random()*12}s`;
+    snow.appendChild(f);
+  }
+})();
+
+function confetti(host, n = 42) {
+  const layer = document.createElement('div'); layer.className = 'confetti';
+  const colors = ['#9d0208', '#c9a227', '#1b4332', '#b3001b', '#2d6a4f'];
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('i');
+    p.style.cssText = `left:${Math.random()*100}%;top:${-4+Math.random()*30}%;background:${colors[i%colors.length]};transform:rotate(${Math.random()*60-30}deg);animation-delay:${Math.random()*.5}s;animation-duration:${1.1+Math.random()*.9}s`;
+    layer.appendChild(p);
+  }
+  host.appendChild(layer);
+  setTimeout(() => layer.remove(), 2600);
+}
+
+// ---------- entrada ----------
+async function loadLogin() {
+  const data = await api('/api/names');
+  state.names = data.users; state.cfg = data;
+  $('#login-title').innerHTML = data.appName.replace(/ /g, ' ').replace(/de Pablo$/, 'de<br>Pablo');
+  document.title = data.appName;
+  const gd = new Date(data.giftDate + 'T12:00:00');
+  $('#ev-day').textContent = gd.getDate();
+  $('#ev-month').textContent = MESES[gd.getMonth()];
+  const jd = new Date(data.joinDeadline + 'T12:00:00');
+  $('#ev-note').textContent = `Apúntate antes del ${jd.getDate()} de ${MESES[jd.getMonth()].toLowerCase()} · ${data.budget}`;
+  $('#login-sub').textContent = `${data.users.length} participantes`;
+  const chips = $('#chips'); chips.innerHTML = '';
+  for (const u of data.users) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.innerHTML = u.kid ? `${u.name} <small>· peque</small>` : u.name;
+    b.onclick = () => {
+      state.selected = u;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+      b.classList.add('sel');
+      $('#pinbox').classList.add('on');
+      $('#pinlabel').textContent = `Tu PIN, ${u.name} (te lo dio Gabri)`;
+      $('#pin').value = '';
+      $('#btn-login').disabled = false;
+      setTimeout(() => $('#pin').focus(), 60);
+    };
+    chips.appendChild(b);
+  }
+  show('#v-login');
+}
+$('#btn-adminlink').onclick = () => { $('#adminbox').classList.add('on'); $('#login-main').style.display = 'none'; setTimeout(() => $('#adminpass').focus(), 60); };
+$('#pin').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-login').click(); });
+$('#adminpass').addEventListener('keydown', e => { if (e.key === 'Enter') $('#btn-admin').click(); });
+$('#btn-login').onclick = async () => {
+  $('#login-error').textContent = '';
+  try {
+    await api('/api/login', { mode: 'user', name: state.selected?.name || '', pin: $('#pin').value });
+    await boot();
+  } catch (e) { $('#login-error').textContent = e.message; }
+};
+$('#btn-admin').onclick = async () => {
+  $('#admin-error').textContent = '';
+  try {
+    await api('/api/login', { mode: 'admin', password: $('#adminpass').value });
+    await boot();
+  } catch (e) { $('#admin-error').textContent = e.message; }
+};
+
+// ---------- participante ----------
+function setTab(tab) {
+  ['lista', 'amigo', 'info'].forEach(t => { $('#tab-' + t).classList.toggle('on', t === tab); $('#p-' + t).classList.toggle('on', t === tab); });
+  location.hash = '/' + tab;
+}
+document.querySelectorAll('.tabbar button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+function renderWishes() {
+  const ul = $('#my-wishes'); ul.innerHTML = '';
+  for (const w of state.wishes) {
+    const li = document.createElement('li');
+    const txt = document.createElement('span'); txt.className = 'txt'; txt.textContent = w.text;
+    li.appendChild(txt);
+    if (w.link) { const a = document.createElement('a'); a.href = w.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'ver enlace'; li.appendChild(a); }
+    const del = document.createElement('button'); del.className = 'del'; del.textContent = '×';
+    del.onclick = () => { state.wishes = state.wishes.filter(x => x.id !== w.id); renderWishes(); };
+    li.appendChild(del);
+    ul.appendChild(li);
+  }
+}
+$('#w-add').onclick = () => {
+  const text = $('#w-text').value.trim(), link = $('#w-link').value.trim();
+  if (!text) return;
+  state.wishes.push({ id: crypto.randomUUID(), text, link });
+  $('#w-text').value = ''; $('#w-link').value = '';
+  renderWishes(); $('#w-text').focus();
+};
+$('#w-save').onclick = async () => {
+  $('#w-saved').textContent = '';
+  try { await api('/api/wishlist', { items: state.wishes }); $('#w-saved').textContent = 'Guardada ✓'; setTimeout(() => $('#w-saved').textContent = '', 2000); }
+  catch (e) { $('#w-saved').textContent = e.message; }
+};
+
+function renderAmigo() {
+  const stage = $('#stage'), after = $('#amigo-after');
+  stage.innerHTML = ''; after.innerHTML = '';
+  if (!state.cfg.drawn) {
+    stage.innerHTML = `<div class="teaser"><div class="envmini">✉️</div><h3>Tu sobre aún está cerrado</h3><p>El sorteo se hace solo al cerrar el plazo.<br>Vuelve después para descubrir a quién le regalas.</p></div>`;
+    return;
+  }
+  if (!state.revealed) {
+    stage.innerHTML = `
+      <div class="envelope" id="env">
+        <div class="env-back"></div>
+        <div class="env-letter"><div class="l1">te ha tocado…</div><div class="l2">?</div></div>
+        <div class="env-sides"></div><div class="env-sides2"></div><div class="env-bottom"></div>
+        <div class="env-flap"></div><div class="env-seal">P</div>
+      </div>
+      <div class="holdhint" id="holdhint">
+        <div class="ring">
+          <svg width="64" height="64"><circle cx="32" cy="32" r="28" fill="none" stroke="rgba(201,162,39,.25)" stroke-width="3"/><circle id="prog" cx="32" cy="32" r="28" fill="none" stroke="#c9a227" stroke-width="3" stroke-linecap="round" stroke-dasharray="176" stroke-dashoffset="176"/></svg>
+          <div class="emoji">👆</div>
+        </div>
+        <p>mantén pulsado el sobre para abrirlo</p>
+      </div>`;
+    holdToReveal();
+    return;
+  }
+  const t = state.revealed;
+  const card = document.createElement('div');
+  card.className = 'card result';
+  card.innerHTML = `<div class="r1">te ha tocado…</div><div class="r2"></div>`;
+  card.querySelector('.r2').textContent = t.name + ' 🎉';
+  stage.appendChild(card); stage.style.justifyContent = 'flex-start';
+  confetti(card);
+  const wish = document.createElement('div');
+  wish.className = 'card wishcard';
+  wish.innerHTML = `<h3>Lista de deseos de ${t.name}</h3><div class="wn">Solo la ves tú, su amigo invisible</div>`;
+  const ul = document.createElement('ul'); ul.className = 'wishlist';
+  if (!t.wishlist.length) { const li = document.createElement('li'); li.textContent = 'Todavía no ha dejado deseos.'; ul.appendChild(li); }
+  for (const w of t.wishlist) {
+    const li = document.createElement('li');
+    const txt = document.createElement('span'); txt.className = 'txt'; txt.textContent = w.text;
+    li.appendChild(txt);
+    if (w.link) { const a = document.createElement('a'); a.href = w.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'ver enlace'; li.appendChild(a); }
+    ul.appendChild(li);
+  }
+  wish.appendChild(ul);
+  const hint = document.createElement('div');
+  hint.className = 'hintcard';
+  hint.innerHTML = `<b>PISTA ANÓNIMA PARA ${t.name.toUpperCase()}</b>`;
+  const ta = document.createElement('textarea');
+  ta.rows = 2; ta.maxLength = 200; ta.placeholder = '“Cabe en una caja de zapatos…”';
+  ta.value = state.hint || '';
+  ta.style.cssText = 'width:100%;margin-top:8px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-family:Caveat,cursive;font-size:19px;resize:none;outline:none';
+  hint.appendChild(ta);
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'mini'; saveBtn.style.marginTop = '8px'; saveBtn.textContent = 'Guardar pista';
+  saveBtn.onclick = async () => {
+    try { await api('/api/hint', { text: ta.value }); saveBtn.textContent = 'Guardada ✓'; setTimeout(() => saveBtn.textContent = 'Guardar pista', 1800); }
+    catch (e) { saveBtn.textContent = e.message; setTimeout(() => saveBtn.textContent = 'Guardar pista', 1800); }
+  };
+  hint.appendChild(saveBtn);
+  wish.appendChild(hint);
+  after.appendChild(wish);
+}
+
+function holdToReveal() {
+  const env = $('#env'), prog = $('#prog');
+  let start = null, raf = null, done = false;
+  const tick = ts => {
+    if (!start) start = ts;
+    const p = Math.min(1, (ts - start) / 700);
+    prog.style.strokeDashoffset = 176 * (1 - p);
+    if (p >= 1 && !done) { done = true; reveal(); return; }
+    if (!done) raf = requestAnimationFrame(tick);
+  };
+  const begin = e => { e.preventDefault(); cancelAnimationFrame(raf); start = null; raf = requestAnimationFrame(tick); };
+  const cancel = () => { if (!done) { cancelAnimationFrame(raf); prog.style.strokeDashoffset = 176; } };
+  env.addEventListener('pointerdown', begin);
+  env.addEventListener('pointerup', cancel);
+  env.addEventListener('pointerleave', cancel);
+  env.addEventListener('contextmenu', e => e.preventDefault());
+}
+async function reveal() {
+  try {
+    const t = await api('/api/reveal', {});
+    state.revealed = t;
+    const env = $('#env');
+    if (env) {
+      env.classList.add('open');
+      env.querySelector('.l2').textContent = t.name;
+      $('#holdhint').style.opacity = 0;
+      setTimeout(() => { renderAmigo(); }, 1500);
+    } else renderAmigo();
+  } catch (e) { $('#holdhint').querySelector('p').textContent = e.message; }
+}
+
+// avisos push
+let swReg = null;
+async function setupPushUI() {
+  const tog = $('#push-toggle');
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) { $('#push-note').textContent = 'Este navegador no admite avisos web.'; return; }
+  swReg = await navigator.serviceWorker.register('/sw.js');
+  const sub = await swReg.pushManager.getSubscription();
+  tog.classList.toggle('on', !!sub);
+  tog.onclick = async () => {
+    try {
+      if (await swReg.pushManager.getSubscription()) {
+        const s = await swReg.pushManager.getSubscription();
+        await api('/api/push', { action: 'unsubscribe', endpoint: s.endpoint });
+        await s.unsubscribe(); tog.classList.remove('on');
+      } else {
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') return;
+        const { key } = await api('/api/push-key');
+        const s = await swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(key) });
+        await api('/api/push', { action: 'subscribe', subscription: s.toJSON() });
+        tog.classList.add('on');
+      }
+    } catch (e) { $('#push-note').textContent = e.message; }
+  };
+}
+function urlB64ToUint8(base64) {
+  const padding = '='.repeat((4 - base64.length % 4) % 4);
+  const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+$('#btn-switch').onclick = async () => { await api('/api/logout', {}); location.reload(); };
+
+async function bootUser() {
+  const me = await api('/api/me');
+  state.me = me; state.cfg = me; state.wishes = me.wishlist || [];
+  $('#app-k').textContent = `hola, ${me.name}`;
+  $('#app-title').textContent = me.appName;
+  $('#app-sub').textContent = `${me.budget} · regalo el ${new Date(me.giftDate + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+  $('#cd-join').textContent = me.drawn ? '✓' : daysTo(me.joinDeadline);
+  $('#cd-join-l').textContent = me.drawn ? 'sorteo hecho' : 'días p. apuntarte';
+  $('#cd-gift').textContent = daysTo(me.giftDate);
+  $('#cd-budget').textContent = me.budget;
+  if (me.hint) { $('#my-hint').style.display = 'block'; $('#my-hint-text').textContent = '“' + me.hint.text + '”'; }
+  renderWishes(); renderAmigo(); setupPushUI();
+  show('#v-app');
+  const tab = location.hash.replace('#/', '');
+  setTab(['lista', 'amigo', 'info'].includes(tab) ? tab : (me.drawn ? 'amigo' : 'lista'));
+}
+
+// ---------- panel de Gabri ----------
+async function loadAdmin() {
+  const s = await api('/api/admin/state');
+  state.admin = s;
+  $('#admin-sub').textContent = `${s.appName} · ${s.budget}`;
+  $('#cfg-name').value = s.appName; $('#cfg-budget').value = s.budget;
+  $('#cfg-join').value = s.joinDeadline; $('#cfg-gift').value = s.giftDate;
+  const wrap = $('#admin-users'); wrap.innerHTML = '';
+  for (const u of s.users) {
+    const row = document.createElement('div'); row.className = 'prow';
+    const estado = u.joinedAt ? '<span class="st ok">✓ apuntado</span>' : '<span class="st">pendiente</span>';
+    row.innerHTML = `
+      <div class="l1"><span class="pn">${u.name}${u.kid ? ' <small>· peque</small>' : ''}</span>${estado}</div>
+      <div class="l2">
+        <span>PIN <span class="pin">${u.pin}</span></span>
+        <span>· ${u.wishes} deseos</span>
+        <span>· ${u.openedAt ? '✉️ sobre abierto' : 'sobre sin abrir'}</span>
+        <button class="act" data-a="invite">copiar invitación</button>
+        <button class="act" data-a="pin">nuevo PIN</button>
+        <button class="act" data-a="del">quitar</button>
+      </div>`;
+    row.querySelector('[data-a=invite]').onclick = async () => {
+      const txt = `¡Hola, ${u.name}! 🎁 Para "El regalo invisible de Pablo" entra en ${location.origin}, toca tu nombre y pon tu PIN: ${u.pin}`;
+      await navigator.clipboard.writeText(txt);
+      row.querySelector('[data-a=invite]').textContent = '¡copiada!';
+      setTimeout(() => row.querySelector('[data-a=invite]').textContent = 'copiar invitación', 1600);
+    };
+    row.querySelector('[data-a=pin]').onclick = async () => {
+      const pin = String(1000 + Math.floor(Math.random() * 9000));
+      if (!confirm(`¿Poner a ${u.name} el PIN ${pin}? Tendrás que decírselo de nuevo.`)) return;
+      try { await api('/api/admin/users', { action: 'set-pin', id: u.id, pin }); loadAdmin(); } catch (e) { alert(e.message); }
+    };
+    row.querySelector('[data-a=del]').onclick = async () => {
+      if (!confirm(`¿Quitar a ${u.name} del sorteo?`)) return;
+      try { await api('/api/admin/users', { action: 'remove', id: u.id }); loadAdmin(); } catch (e) { alert(e.message); }
+    };
+    wrap.appendChild(row);
+  }
+  renderPairs();
+  renderDraw(s);
+}
+$('#u-gen').onclick = () => { $('#u-pin').value = String(1000 + Math.floor(Math.random() * 9000)); };
+$('#u-add').onclick = async () => {
+  $('#u-error').textContent = '';
+  try {
+    await api('/api/admin/users', { action: 'add', name: $('#u-name').value, pin: $('#u-pin').value, kid: $('#u-kid').checked });
+    $('#u-name').value = ''; $('#u-pin').value = ''; $('#u-kid').checked = false;
+    loadAdmin();
+  } catch (e) { $('#u-error').textContent = e.message; }
+};
+$('#cfg-save').onclick = async () => {
+  try { await api('/api/admin/config', { appName: $('#cfg-name').value, budget: $('#cfg-budget').value, joinDeadline: $('#cfg-join').value, giftDate: $('#cfg-gift').value }); loadAdmin(); }
+  catch (e) { alert(e.message); }
+};
+function renderPairs() {
+  const list = $('#ly-list'); list.innerHTML = '';
+  for (const [i, p] of (state.admin.lastYear || []).entries()) {
+    const d = document.createElement('div'); d.className = 'pair';
+    d.innerHTML = `<span>${p[0]} → ${p[1]}</span>`;
+    const x = document.createElement('button'); x.className = 'x'; x.textContent = '×';
+    x.onclick = () => { state.admin.lastYear.splice(i, 1); renderPairs(); savePairs(); };
+    d.appendChild(x); list.appendChild(d);
+  }
+}
+async function savePairs() {
+  try { await api('/api/admin/lastyear', { pairs: state.admin.lastYear }); } catch (e) { alert(e.message); }
+}
+$('#ly-add').onclick = () => {
+  const a = $('#ly-from').value.trim(), b = $('#ly-to').value.trim();
+  if (!a || !b) return;
+  state.admin.lastYear.push([a, b]);
+  $('#ly-from').value = ''; $('#ly-to').value = '';
+  renderPairs(); savePairs();
+};
+function renderDraw(s) {
+  const dz = $('#drawzone');
+  if (s.drawn) {
+    const opened = s.users.filter(u => u.openedAt).length;
+    dz.innerHTML = `<div class="dado">🎉</div><p>Sorteo hecho el ${new Date(s.drawnAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}.<br>${opened} de ${s.users.length} han abierto su sobre.<br><b>Tú nunca ves las asignaciones: así también juegas.</b></p>`;
+    return;
+  }
+  const joined = s.users.filter(u => u.joinedAt).length;
+  dz.innerHTML = `<div class="dado">🎲</div><p>${s.users.length} participantes · ${joined} apuntados.<br>Si no lo haces antes, el sorteo se hace solo el ${new Date(s.joinDeadline + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} a las 23:59.</p>`;
+  const b = document.createElement('button');
+  b.className = 'cta green'; b.style.marginTop = '4px'; b.textContent = 'Hacer el sorteo ahora 🎲';
+  b.onclick = async () => {
+    if (!confirm('¿Hacer el sorteo ahora? No se puede deshacer.')) return;
+    b.innerHTML = '<span class="spin">🎲</span> Mezclando…';
+    try { await new Promise(r => setTimeout(r, 900)); await api('/api/admin/draw', {}); loadAdmin(); }
+    catch (e) { b.textContent = 'Hacer el sorteo ahora 🎲'; alert(e.message); }
+  };
+  dz.appendChild(b);
+}
+$('#btn-export').onclick = () => { location.href = '/api/export'; };
+$('#btn-logout').onclick = async () => { await api('/api/logout', {}); location.reload(); };
+
+// ---------- arranque ----------
+async function boot() {
+  try {
+    const s = await api('/api/session');
+    if (s.role === 'admin') { show('#v-admin'); await loadAdmin(); return; }
+    await bootUser(); return;
+  } catch { /* sin sesión */ }
+  await loadLogin();
+}
+boot().catch(() => loadLogin());
+</script>
+</body>
+</html>
