@@ -1,4 +1,4 @@
-# El regalo invisible de Pablo · v1 para Cloudflare Workers
+# Amigo invisible FugaLos · v1 para Cloudflare Workers
 
 El amigo invisible de la familia: cada uno entra con su nombre y su PIN, deja su lista de deseos y abre su sobre. Sin registro, sin app que instalar desde una store (es una PWA). Diseño «Postal»: papel crema, verde pino y granate, sobre que se abre manteniendo pulsado, nieve y confeti.
 

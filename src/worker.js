@@ -124,7 +124,7 @@ export class Sorteo extends DurableObject {
   async cfg() {
     let cfg = await this.ctx.storage.get('cfg:main');
     if (!cfg) {
-      cfg = { appName: 'El regalo invisible de Pablo', budget: '10 €', joinDeadline: '2026-12-01', giftDate: '2026-12-31', createdAt: Date.now(), drawnAt: null };
+      cfg = { appName: 'Amigo invisible FugaLos', budget: '10 €', joinDeadline: '2026-12-01', giftDate: '2026-12-31', createdAt: Date.now(), drawnAt: null };
       await this.ctx.storage.put('cfg:main', cfg);
     }
     return cfg;

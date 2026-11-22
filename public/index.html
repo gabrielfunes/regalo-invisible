@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f6efe3">
-<title>El regalo invisible de Pablo</title>
+<title>Amigo invisible FugaLos</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -199,7 +199,7 @@ a { color:var(--red); }
 <section class="view" id="v-login">
   <div class="brand">
     <div class="k">el sorteo de la familia</div>
-    <h1 id="login-title">El regalo<br>invisible de Pablo</h1>
+    <h1 id="login-title">Amigo invisible<br>FugaLos</h1>
     <div class="sub" id="login-sub">Nochevieja</div>
   </div>
   <div class="card event">
@@ -229,7 +229,7 @@ a { color:var(--red); }
 <section class="view" id="v-app">
   <div class="brand">
     <div class="k" id="app-k">hola</div>
-    <h2 id="app-title">El regalo invisible de Pablo</h2>
+    <h2 id="app-title">Amigo invisible FugaLos</h2>
     <div class="sub" id="app-sub"></div>
   </div>
   <div class="count">
@@ -393,7 +393,7 @@ function confetti(host, n = 42) {
 async function loadLogin() {
   const data = await api('/api/names');
   state.names = data.users; state.cfg = data;
-  $('#login-title').innerHTML = data.appName.replace(/ /g, ' ').replace(/de Pablo$/, 'de<br>Pablo');
+  $('#login-title').innerHTML = data.appName.replace(/ ([^ ]+)$/, '<br>$1');
   document.title = data.appName;
   const gd = new Date(data.giftDate + 'T12:00:00');
   $('#ev-day').textContent = gd.getDate();
@@ -637,7 +637,7 @@ async function loadAdmin() {
         <button class="act" data-a="del">quitar</button>
       </div>`;
     row.querySelector('[data-a=invite]').onclick = async () => {
-      const txt = `¡Hola, ${u.name}! 🎁 Para "El regalo invisible de Pablo" entra en ${location.origin}, toca tu nombre y pon tu PIN: ${u.pin}`;
+      const txt = `¡Hola, ${u.name}! 🎁 Para "Amigo invisible FugaLos" entra en ${location.origin}, toca tu nombre y pon tu PIN: ${u.pin}`;
       await navigator.clipboard.writeText(txt);
       row.querySelector('[data-a=invite]').textContent = '¡copiada!';
       setTimeout(() => row.querySelector('[data-a=invite]').textContent = 'copiar invitación', 1600);

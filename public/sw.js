@@ -1,7 +1,7 @@
 self.addEventListener('push', e => {
   let data = {};
   try { data = e.data ? e.data.json() : {}; } catch { /* texto plano o vacío */ }
-  const title = data.title || 'El regalo invisible de Pablo';
+  const title = data.title || 'Amigo invisible FugaLos';
   e.waitUntil(self.registration.showNotification(title, {
     body: data.body || '',
     icon: '/icon-192.png',

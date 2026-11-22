@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.1 · 2026-11-22
+
+- La app pasa a llamarse «Amigo invisible FugaLos» (título, cabeceras, manifiesto PWA, notificaciones, mensaje de invitación y nombre por defecto del sorteo). Sin cambios técnicos: el worker y el almacén siguen llamándose igual.
+
 ## v1.0.0 · 2026-11-22
 
 - Primera versión: sorteo de amigo invisible familiar en Cloudflare Workers (Worker + Durable Object SQLite, frontend estático sin build, PWA instalable).
