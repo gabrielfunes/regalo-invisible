@@ -210,12 +210,12 @@ export class Sorteo extends DurableObject {
     }
 
     const session = await this.session(req);
-    if (!session) return json({ error: 'Sesión caducada. Vuelve a entrar.' }, 401, clearCookie());
-    if (path === '/api/session' && req.method === 'GET') return json({ role: session.role, expiresAt: session.expiresAt });
     if (path === '/api/logout' && req.method === 'POST') {
-      await this.ctx.storage.delete(session.key);
+      if (session) await this.ctx.storage.delete(session.key);
       return json({ ok: true }, 200, clearCookie());
     }
+    if (!session) return json({ error: 'Sesión caducada. Vuelve a entrar.' }, 401, clearCookie());
+    if (path === '/api/session' && req.method === 'GET') return json({ role: session.role, expiresAt: session.expiresAt });
 
     // ===== Participante =====
     if (session.role === 'user') {
@@ -223,7 +223,21 @@ export class Sorteo extends DurableObject {
       const user = await this.ctx.storage.get('user:' + session.userId);
       if (path === '/api/me' && req.method === 'GET') {
         const hint = cfg.drawnAt ? (await this.ctx.storage.get('hint:' + session.userId)) || null : null;
-        return json({ role: 'user', ...publicCfg(cfg), name: user.name, kid: !!user.kid, wishlist: user.wishlist || [], hint });
+        const others = [...(await this.users()).values()].filter(u => u.id !== user.id).map(u => ({ id: u.id, name: u.name })).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+        const lastGift = user.lastGiftTo === undefined ? null : { answered: true, to: user.lastGiftTo || null };
+        return json({ role: 'user', ...publicCfg(cfg), name: user.name, kid: !!user.kid, wishlist: user.wishlist || [], hint, others, lastGift });
+      }
+      // A quién le regaló este participante el año pasado (solo para no repetir en el sorteo).
+      if (path === '/api/lastgift' && req.method === 'POST') {
+        if (cfg.drawnAt) return json({ error: 'El sorteo ya se hizo; ya no se puede cambiar' }, 409);
+        const to = typeof body.to === 'string' ? body.to : '';
+        if (to) {
+          const target = await this.ctx.storage.get('user:' + to);
+          if (!target || target.id === user.id) return json({ error: 'Persona no válida' }, 400);
+        }
+        user.lastGiftTo = to;
+        await this.ctx.storage.put('user:' + session.userId, user);
+        return json({ ok: true });
       }
       if (path === '/api/wishlist' && req.method === 'POST') {
         let items;
@@ -261,10 +275,9 @@ export class Sorteo extends DurableObject {
       if (path === '/api/admin/state' && req.method === 'GET') {
         const users = [...(await this.users()).values()].map(u => ({
           id: u.id, name: u.name, kid: !!u.kid, pin: u.pin, joinedAt: u.joinedAt || null,
-          wishes: (u.wishlist || []).length, openedAt: u.openedAt || null
+          wishes: (u.wishlist || []).length, openedAt: u.openedAt || null, lastGiftAnswered: u.lastGiftTo !== undefined
         })).sort((a, b) => a.name.localeCompare(b.name, 'es'));
-        const lastYear = (await this.ctx.storage.get('cfg:lastYear')) || [];
-        return json({ role: 'admin', ...publicCfg(cfg), drawnAt: cfg.drawnAt, users, lastYear });
+        return json({ role: 'admin', ...publicCfg(cfg), drawnAt: cfg.drawnAt, users });
       }
       if (path === '/api/admin/config' && req.method === 'POST') {
         const appName = typeof body.appName === 'string' && body.appName.trim() && body.appName.trim().length <= 80 ? body.appName.trim() : cfg.appName;
@@ -313,19 +326,6 @@ export class Sorteo extends DurableObject {
           return json({ ok: true });
         }
       }
-      if (path === '/api/admin/lastyear' && req.method === 'POST') {
-        if (cfg.drawnAt) return json({ error: 'El sorteo ya se hizo; las parejas del año pasado quedan como estaban' }, 409);
-        if (!Array.isArray(body.pairs) || body.pairs.length > 100) return json({ error: 'Lista de parejas no válida' }, 400);
-        let pairs;
-        try {
-          pairs = body.pairs.map(p => {
-            if (!Array.isArray(p) || p.length !== 2 || !validName(p[0]) || !validName(p[1])) throw Error();
-            return [p[0].trim(), p[1].trim()];
-          });
-        } catch { return json({ error: 'Lista de parejas no válida' }, 400); }
-        await this.ctx.storage.put('cfg:lastYear', pairs);
-        return json({ ok: true });
-      }
       if (path === '/api/admin/draw' && req.method === 'POST') {
         if (cfg.drawnAt) return json({ error: 'El sorteo ya se hizo el ' + new Date(cfg.drawnAt).toLocaleDateString('es-ES', { timeZone: MADRID }) }, 409);
         const result = await this.runDraw();
@@ -336,7 +336,7 @@ export class Sorteo extends DurableObject {
       if (path === '/api/export' && req.method === 'GET') {
         const exportedAt = Date.now();
         const users = [...(await this.users()).values()].map(u => ({ name: u.name, kid: !!u.kid, wishlist: u.wishlist || [], joinedAt: u.joinedAt || null, openedAt: u.openedAt || null }));
-        const payload = JSON.stringify({ app: 'regalo-invisible', exportedAt: new Date(exportedAt).toISOString(), config: publicCfg(cfg), parejasAnoPasado: (await this.ctx.storage.get('cfg:lastYear')) || [], participantes: users, nota: 'Sin asignaciones ni pistas: ni el organizador puede verlas.' }, null, 2);
+        const payload = JSON.stringify({ app: 'regalo-invisible', exportedAt: new Date(exportedAt).toISOString(), config: publicCfg(cfg), participantes: users, nota: 'Sin asignaciones, pistas ni parejas del año pasado.' }, null, 2);
         return new Response(payload, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Disposition': `attachment; filename="regalo-invisible-${new Date(exportedAt).toISOString().slice(0, 10)}.json"`, 'Cache-Control': 'no-store' } });
       }
     }
@@ -361,14 +361,22 @@ export class Sorteo extends DurableObject {
     return json({ error: 'Ruta o método no permitido' }, 404);
   }
 
+  // Parejas del año pasado: lo que cada participante ha indicado (más las que hubiera cargado el organizador en v1.0).
+  async lastYearPairs(users) {
+    const byId = new Map(users.map(u => [u.id, u.name]));
+    const pairs = [...((await this.ctx.storage.get('cfg:lastYear')) || [])];
+    for (const u of users) if (u.lastGiftTo && byId.has(u.lastGiftTo)) pairs.push([u.name, byId.get(u.lastGiftTo)]);
+    return pairs;
+  }
+
   async runDraw() {
     const cfg = await this.cfg();
     if (cfg.drawnAt) return { error: 'El sorteo ya está hecho' };
     const users = [...(await this.users()).values()];
     if (users.length < 2) return { status: 409, error: 'Hacen falta al menos 2 participantes' };
-    const lastYear = (await this.ctx.storage.get('cfg:lastYear')) || [];
+    const lastYear = await this.lastYearPairs(users);
     const result = hacerSorteo(users, lastYear);
-    if (!result) return { status: 409, error: 'No hay combinación posible sin repetir el año pasado. Revisa las parejas cargadas.' };
+    if (!result) return { status: 409, error: 'No hay combinación posible sin repetir el año pasado. Alguien tendrá que revisar a quién regaló el año pasado.' };
     for (const [giver, target] of result) await this.ctx.storage.put('assign:' + giver, target);
     cfg.drawnAt = Date.now();
     await this.ctx.storage.put('cfg:main', cfg);
@@ -449,3 +457,4 @@ export class Sorteo extends DurableObject {
     if (times.length) await this.ctx.storage.setAlarm(Math.min(...times));
   }
 }
+
