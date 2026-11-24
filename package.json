@@ -1,6 +1,6 @@
 {
   "name": "regalo-invisible",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,4 +12,5 @@
     "wrangler": "4.158.0"
   }
 }
+
 
