@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.0 · 2026-11-24
+
+- Las parejas del año pasado ya no las carga el organizador: cada participante indica en «Mi lista» a quién le regaló (solo lo usa el sorteo). Se quita ese apartado del panel.
+- Cerrar sesión del panel más a mano (botón arriba) y que funcione aunque la sesión haya caducado, para entrar luego como participante.
+
 ## v1.0.1 · 2026-11-22
 
 - La app pasa a llamarse «Amigo invisible FugaLos» (título, cabeceras, manifiesto PWA, notificaciones, mensaje de invitación y nombre por defecto del sorteo). Sin cambios técnicos: el worker y el almacén siguen llamándose igual.
@@ -13,3 +18,4 @@
 - El organizador ve quién se ha apuntado y quién ha abierto el sobre, nunca las asignaciones. Exportación manual sin asignaciones ni pistas.
 - Avisos push (VAPID generado en el Durable Object): cierre de plazo, sorteo hecho, víspera y día del regalo.
 - Diseño «Postal»: papel crema, verde pino y granate, sobre animado, nieve y confeti. Pruebas del reparto y de la validación.
+
