@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.1 · 2026-11-24
+
+- El organizador vuelve a ver, en el panel, a quién dijo cada uno que regaló el año pasado.
+- Dos personas no pueden poner al mismo regalado del año pasado: sale el aviso «X ya ha puesto que tuvo a Y de amigo invisible el año pasado.»
+
 ## v1.1.0 · 2026-11-24
 
 - Las parejas del año pasado ya no las carga el organizador: cada participante indica en «Mi lista» a quién le regaló (solo lo usa el sorteo). Se quita ese apartado del panel.
@@ -18,4 +23,5 @@
 - El organizador ve quién se ha apuntado y quién ha abierto el sobre, nunca las asignaciones. Exportación manual sin asignaciones ni pistas.
 - Avisos push (VAPID generado en el Durable Object): cierre de plazo, sorteo hecho, víspera y día del regalo.
 - Diseño «Postal»: papel crema, verde pino y granate, sobre animado, nieve y confeti. Pruebas del reparto y de la validación.
+
 
