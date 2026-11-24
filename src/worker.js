@@ -234,6 +234,9 @@ export class Sorteo extends DurableObject {
         if (to) {
           const target = await this.ctx.storage.get('user:' + to);
           if (!target || target.id === user.id) return json({ error: 'Persona no válida' }, 400);
+          for (const other of (await this.users()).values()) {
+            if (other.id !== user.id && other.lastGiftTo === to) return json({ error: `${other.name} ya ha puesto que tuvo a ${target.name} de amigo invisible el año pasado.` }, 409);
+          }
         }
         user.lastGiftTo = to;
         await this.ctx.storage.put('user:' + session.userId, user);
@@ -273,9 +276,11 @@ export class Sorteo extends DurableObject {
     if (session.role === 'admin') {
       const cfg = await this.cfg();
       if (path === '/api/admin/state' && req.method === 'GET') {
-        const users = [...(await this.users()).values()].map(u => ({
+        const all = await this.users();
+        const users = [...all.values()].map(u => ({
           id: u.id, name: u.name, kid: !!u.kid, pin: u.pin, joinedAt: u.joinedAt || null,
-          wishes: (u.wishlist || []).length, openedAt: u.openedAt || null, lastGiftAnswered: u.lastGiftTo !== undefined
+          wishes: (u.wishlist || []).length, openedAt: u.openedAt || null, lastGiftAnswered: u.lastGiftTo !== undefined,
+          lastGiftTo: u.lastGiftTo ? (all.get('user:' + u.lastGiftTo) || {}).name || null : null
         })).sort((a, b) => a.name.localeCompare(b.name, 'es'));
         return json({ role: 'admin', ...publicCfg(cfg), drawnAt: cfg.drawnAt, users });
       }
@@ -335,7 +340,8 @@ export class Sorteo extends DurableObject {
       // Exportación manual: todo salvo asignaciones y pistas, para que el organizador no se las cuele.
       if (path === '/api/export' && req.method === 'GET') {
         const exportedAt = Date.now();
-        const users = [...(await this.users()).values()].map(u => ({ name: u.name, kid: !!u.kid, wishlist: u.wishlist || [], joinedAt: u.joinedAt || null, openedAt: u.openedAt || null }));
+        const all = await this.users();
+        const users = [...all.values()].map(u => ({ name: u.name, kid: !!u.kid, wishlist: u.wishlist || [], joinedAt: u.joinedAt || null, openedAt: u.openedAt || null }));
         const payload = JSON.stringify({ app: 'regalo-invisible', exportedAt: new Date(exportedAt).toISOString(), config: publicCfg(cfg), participantes: users, nota: 'Sin asignaciones, pistas ni parejas del año pasado.' }, null, 2);
         return new Response(payload, { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Content-Disposition': `attachment; filename="regalo-invisible-${new Date(exportedAt).toISOString().slice(0, 10)}.json"`, 'Cache-Control': 'no-store' } });
       }
@@ -457,4 +463,5 @@ export class Sorteo extends DurableObject {
     if (times.length) await this.ctx.storage.setAlarm(Math.min(...times));
   }
 }
+
 
