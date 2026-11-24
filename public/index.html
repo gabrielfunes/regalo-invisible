@@ -641,6 +641,7 @@ async function loadAdmin() {
         <span>PIN <span class="pin">${u.pin}</span></span>
         <span>· ${u.wishes} deseos</span>
         <span>· ${u.openedAt ? '✉️ sobre abierto' : 'sobre sin abrir'}</span>
+        <span>· año pasado: ${u.lastGiftAnswered ? (u.lastGiftTo ? 'regaló a ' + u.lastGiftTo : 'a nadie') : 'sin responder'}</span>
         <button class="act" data-a="invite">copiar invitación</button>
         <button class="act" data-a="pin">nuevo PIN</button>
         <button class="act" data-a="del">quitar</button>
@@ -714,4 +715,5 @@ boot().catch(() => loadLogin());
 </script>
 </body>
 </html>
+
 
