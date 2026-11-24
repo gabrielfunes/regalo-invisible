@@ -260,6 +260,12 @@ a { color:var(--red); }
       <div class="saved" id="w-saved"></div>
     </div>
     <button class="cta" id="w-save" style="margin-top:16px">Guardar lista</button>
+    <div class="card wishcard" id="ly-card" style="margin-top:16px">
+      <h3>El año pasado</h3>
+      <div class="wn">¿A quién le regalaste? Así el sorteo no te repite. Solo lo usa el sorteo, nadie lo ve.</div>
+      <select id="ly-select" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--card)"></select>
+      <div class="saved" id="ly-saved"></div>
+    </div>
   </div>
 
   <div class="panel" id="p-amigo">
@@ -297,6 +303,7 @@ a { color:var(--red); }
 
 <!-- ============ PANEL DE GABRI ============ -->
 <section class="view" id="v-admin">
+  <div style="text-align:right"><button class="mini ghost" id="btn-logout-top">Cerrar sesión · entrar como yo</button></div>
   <div class="brand">
     <div class="k">panel de</div>
     <h2>Gabri</h2>
@@ -329,18 +336,6 @@ a { color:var(--red); }
     <label style="display:flex;align-items:center;gap:8px;margin-top:12px"><input type="checkbox" id="u-kid"> Es un peque</label>
     <div style="margin-top:12px;text-align:right"><button class="mini" id="u-add">Añadir</button></div>
     <div class="error" id="u-error" style="text-align:right"></div>
-  </div>
-
-  <div class="admintitle">Año pasado <small>para no repetir</small></div>
-  <div class="card acard">
-    <div style="display:flex;gap:8px;align-items:center">
-      <input type="text" id="ly-from" placeholder="Quién regaló" style="flex:1">
-      <span>→</span>
-      <input type="text" id="ly-to" placeholder="A quién" style="flex:1">
-    </div>
-    <div style="margin-top:10px;text-align:right"><button class="mini ghost" id="ly-add">Añadir pareja</button></div>
-    <div class="pairlist" id="ly-list"></div>
-    <div style="margin-top:12px;text-align:right" id="ly-save-wrap" style="display:none"><button class="mini" id="ly-save">Guardar parejas</button></div>
   </div>
 
   <div class="admintitle">Sorteo</div>
@@ -596,7 +591,7 @@ function urlB64ToUint8(base64) {
   const b64 = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
   return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
 }
-$('#btn-switch').onclick = async () => { await api('/api/logout', {}); location.reload(); };
+$('#btn-switch').onclick = async () => { try { await api('/api/logout', {}); } catch {} location.reload(); };
 
 async function bootUser() {
   const me = await api('/api/me');
@@ -609,10 +604,24 @@ async function bootUser() {
   $('#cd-gift').textContent = daysTo(me.giftDate);
   $('#cd-budget').textContent = me.budget;
   if (me.hint) { $('#my-hint').style.display = 'block'; $('#my-hint-text').textContent = '“' + me.hint.text + '”'; }
-  renderWishes(); renderAmigo(); setupPushUI();
+  renderWishes(); renderAmigo(); setupPushUI(); renderLastGift(me);
   show('#v-app');
   const tab = location.hash.replace('#/', '');
   setTab(['lista', 'amigo', 'info'].includes(tab) ? tab : (me.drawn ? 'amigo' : 'lista'));
+}
+
+function renderLastGift(me) {
+  const sel = $('#ly-select');
+  const opts = [['', '— Elige —'], ['none', 'A nadie / no participé']].concat(me.others.map(o => [o.id, o.name]));
+  sel.innerHTML = '';
+  for (const [v, t] of opts) { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); }
+  sel.value = me.lastGift ? (me.lastGift.to || 'none') : '';
+  if (me.drawn) sel.disabled = true;
+  sel.onchange = async () => {
+    if (!sel.value) return;
+    try { await api('/api/lastgift', { to: sel.value === 'none' ? '' : sel.value }); $('#ly-saved').textContent = 'Guardado ✓'; }
+    catch (e) { $('#ly-saved').textContent = e.message; }
+  };
 }
 
 // ---------- panel de Gabri ----------
@@ -653,7 +662,6 @@ async function loadAdmin() {
     };
     wrap.appendChild(row);
   }
-  renderPairs();
   renderDraw(s);
 }
 $('#u-gen').onclick = () => { $('#u-pin').value = String(1000 + Math.floor(Math.random() * 9000)); };
@@ -669,26 +677,6 @@ $('#cfg-save').onclick = async () => {
   try { await api('/api/admin/config', { appName: $('#cfg-name').value, budget: $('#cfg-budget').value, joinDeadline: $('#cfg-join').value, giftDate: $('#cfg-gift').value }); loadAdmin(); }
   catch (e) { alert(e.message); }
 };
-function renderPairs() {
-  const list = $('#ly-list'); list.innerHTML = '';
-  for (const [i, p] of (state.admin.lastYear || []).entries()) {
-    const d = document.createElement('div'); d.className = 'pair';
-    d.innerHTML = `<span>${p[0]} → ${p[1]}</span>`;
-    const x = document.createElement('button'); x.className = 'x'; x.textContent = '×';
-    x.onclick = () => { state.admin.lastYear.splice(i, 1); renderPairs(); savePairs(); };
-    d.appendChild(x); list.appendChild(d);
-  }
-}
-async function savePairs() {
-  try { await api('/api/admin/lastyear', { pairs: state.admin.lastYear }); } catch (e) { alert(e.message); }
-}
-$('#ly-add').onclick = () => {
-  const a = $('#ly-from').value.trim(), b = $('#ly-to').value.trim();
-  if (!a || !b) return;
-  state.admin.lastYear.push([a, b]);
-  $('#ly-from').value = ''; $('#ly-to').value = '';
-  renderPairs(); savePairs();
-};
 function renderDraw(s) {
   const dz = $('#drawzone');
   if (s.drawn) {
@@ -697,7 +685,7 @@ function renderDraw(s) {
     return;
   }
   const joined = s.users.filter(u => u.joinedAt).length;
-  dz.innerHTML = `<div class="dado">🎲</div><p>${s.users.length} participantes · ${joined} apuntados.<br>Si no lo haces antes, el sorteo se hace solo el ${new Date(s.joinDeadline + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} a las 23:59.</p>`;
+  dz.innerHTML = `<div class="dado">🎲</div><p>${s.users.length} participantes · ${joined} apuntados · ${s.users.filter(u => u.lastGiftAnswered).length} han dicho a quién regalaron el año pasado.<br>Si no lo haces antes, el sorteo se hace solo el ${new Date(s.joinDeadline + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })} a las 23:59.</p>`;
   const b = document.createElement('button');
   b.className = 'cta green'; b.style.marginTop = '4px'; b.textContent = 'Hacer el sorteo ahora 🎲';
   b.onclick = async () => {
@@ -709,7 +697,9 @@ function renderDraw(s) {
   dz.appendChild(b);
 }
 $('#btn-export').onclick = () => { location.href = '/api/export'; };
-$('#btn-logout').onclick = async () => { await api('/api/logout', {}); location.reload(); };
+const adminLogout = async () => { try { await api('/api/logout', {}); } catch {} location.reload(); };
+$('#btn-logout').onclick = adminLogout;
+$('#btn-logout-top').onclick = adminLogout;
 
 // ---------- arranque ----------
 async function boot() {
@@ -724,3 +714,4 @@ boot().catch(() => loadLogin());
 </script>
 </body>
 </html>
+
